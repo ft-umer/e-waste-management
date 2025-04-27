@@ -13,7 +13,7 @@ const signUp = async (
   address: string,
   phone: string
 ) => {
-  const response = await fetch('http://localhost:3000/api/auth/register', {
+  const response = await fetch('https://e-waste-server-3kicixm72-syed-umer-mujahid-hassnis-projects.vercel.app/api/auth/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
