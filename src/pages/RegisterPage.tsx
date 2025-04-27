@@ -4,43 +4,7 @@ import { Mail, Lock, User, Phone, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-
-
-const signUp = async (
-  email: string,
-  password: string,
-  name: string,
-  address: string,
-  phone: string
-) => {
-  const response = await fetch('https://e-waste-server-3kicixm72-syed-umer-mujahid-hassnis-projects.vercel.app/api/auth/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      email,
-      password,
-      name,
-      address,
-      phone
-    })
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || 'Failed to register');
-  }
-
-  const result = await response.json();
-
-  // Optional: store token and user in localStorage or context
-  localStorage.setItem('token', result.token);
-  localStorage.setItem('user', JSON.stringify(result.user));
-
-  return result;
-};
-
+import { signUp } from '../services/auth';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -52,6 +16,7 @@ const RegisterPage: React.FC = () => {
     address: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,18 +35,24 @@ const RegisterPage: React.FC = () => {
     }
 
     setIsLoading(true);
+    setErrorMessage('');
 
     try {
-      await signUp(
+      const response = await signUp(
         formData.email,
         formData.password,
         formData.name,
         formData.address,
         formData.phone
       );
-      navigate('/siginin');
-    } catch (error) {
-      console.error('Registration error:', error);
+
+      if (response?.token) {
+        // ✅ Dispatch the custom auth change event
+        window.dispatchEvent(new Event('authChange'));
+        navigate('/signin');
+      }
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +73,9 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMessage && (
+              <p className="text-red-600 text-sm text-center">{errorMessage}</p>
+            )}
             <div>
               <Input
                 label="Full Name"
