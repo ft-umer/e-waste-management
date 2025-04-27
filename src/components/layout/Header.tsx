@@ -83,6 +83,8 @@ useEffect(() => {
             <Link to="/about" className="text-gray-700 hover:text-green-500 font-medium">About</Link>
             <Link to="/services" className="text-gray-700 hover:text-green-500 font-medium">Services</Link>
             <Link to="/education" className="text-gray-700 hover:text-green-500 font-medium">Education</Link>
+            <Link to="/seminars" className="text-gray-700 hover:text-green-500 font-medium">Seminars</Link>
+            <Link to="/waste" className="text-gray-700 hover:text-green-500 font-medium">Waste products</Link>
             <Link to="/locations" className="text-gray-700 hover:text-green-500 font-medium">Locations</Link>
 
             {isAuthenticated ? (
@@ -170,6 +172,20 @@ useEffect(() => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Locations
+              </Link>
+              <Link
+                to="/seminars"
+                className="text-gray-700 hover:text-green-500 font-medium py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Seminars
+              </Link>
+              <Link
+                to="/waste"
+                className="text-gray-700 hover:text-green-500 font-medium py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Waste
               </Link>
 
               {isAuthenticated ? (

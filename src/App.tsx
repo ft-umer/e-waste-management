@@ -8,6 +8,11 @@ import LocationsPage from "./pages/LocationsPage";
 import EducationPage from "./pages/EducationPage";
 import PickupRequestPage from "./pages/PickupRequestPage";
 import SignInPage from "./pages/SignInPage";
+import ListWastePage from './pages/waste/ListWastePage';
+import RecycleFormPage from './pages/waste/RecycleFromPage';
+import BuyFormPage from './pages/waste/BuyFormPage';
+import SeminarsPage from './pages/seminar/SeminarsPage';
+import CreateSeminarPage from './pages/seminar/CreateSeminarPage';
 import RegisterPage from "./pages/RegisterPage";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -34,7 +39,12 @@ function App() {
               }
             />
             <Route path="/locations" element={<LocationsPage />} />
+            <Route path="/waste" element={<ListWastePage />} />
+            <Route path="/seminars" element={<SeminarsPage />} />
             <Route path="/education" element={<EducationPage />} />
+            <Route path="/waste/recycle/:id" element={<RecycleFormPage />} />
+            <Route path="/waste/buy/:id" element={<BuyFormPage />} />
+            <Route path="/seminars/new" element={<CreateSeminarPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route
