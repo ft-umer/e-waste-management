@@ -16,7 +16,7 @@ const SeminarsPage: React.FC = () => {
   useEffect(() => {
     const fetchSeminars = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/seminars');
+        const response = await fetch('https://backend-e-waste-management.vercel.app/api/seminars');
         const data = await response.json();
         setSeminars(data);
       } catch (error) {

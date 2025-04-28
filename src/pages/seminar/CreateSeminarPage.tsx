@@ -20,7 +20,7 @@ const CreateSeminarPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/seminars', {
+      const res = await fetch('https://backend-e-waste-management.vercel.app/api/seminars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
