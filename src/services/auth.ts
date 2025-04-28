@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'https://e-waste-management-backend.vercel.app/api/auth';
+const API_URL = 'https://backend-e-waste-management.vercel.app/api/auth';
 
 // Sign In function using axios
 export const signIn = async (email: string, password: string) => {
