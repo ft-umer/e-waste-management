@@ -52,12 +52,7 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin }) => {
             <span className="text-sm capitalize">{seminar.platform.replace('_', ' ')}</span>
           </div>
 
-          {seminar.attendees > 0 && (
-            <div className="flex items-center text-gray-600">
-              <Users className="h-4 w-4 mr-2" />
-              <span className="text-sm">{seminar.attendees} registered attendees</span>
-            </div>
-          )}
+         
         </div>
 
         <div className="space-y-3">

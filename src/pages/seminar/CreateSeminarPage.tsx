@@ -14,16 +14,32 @@ const CreateSeminarPage: React.FC = () => {
     date: '',
     time: '',
     platform: 'zoom',
-    link: '',
-    image: ''
+    link: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submit seminar:', formData);
-    // Implement form submission
-    navigate('/seminars');
+    try {
+      const res = await fetch('http://localhost:5000/api/seminars', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Seminar created:', data);
+        navigate('/seminars');
+      } else {
+        console.error('Failed to create seminar');
+      }
+    } catch (err) {
+      console.error('Error creating seminar:', err);
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -130,15 +146,7 @@ const CreateSeminarPage: React.FC = () => {
                 fullWidth
               />
 
-              <Input
-                label="Cover Image URL"
-                type="url"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                placeholder="Enter image URL (optional)"
-                fullWidth
-              />
-
+             
               <div className="flex space-x-4">
                 <Button
                   type="submit"

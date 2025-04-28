@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Video, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,52 +7,38 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { Seminar } from '../../types';
 
-// Mock data - replace with actual API call
-const mockSeminars: Seminar[] = [
-  {
-    id: '1',
-    title: 'E-Waste Management Best Practices',
-    description: 'Learn about proper disposal methods and environmental impact of electronic waste.',
-    speaker: 'Dr. Sarah Johnson',
-    date: '2024-01-15',
-    time: '10:00 AM',
-    platform: 'zoom',
-    link: 'https://zoom.us/j/123456789',
-    image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg',
-    attendees: 45,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: 'Recycling Electronics: A Technical Guide',
-    description: 'Technical insights into recycling various electronic components.',
-    speaker: 'Prof. Michael Chen',
-    date: '2024-01-20',
-    time: '2:00 PM',
-    platform: 'google_meet',
-    link: 'https://meet.google.com/abc-defg-hij',
-    image: 'https://images.pexels.com/photos/159397/solar-panel-array-power-sun-electricity-159397.jpeg',
-    attendees: 32,
-    createdAt: new Date().toISOString()
-  }
-];
 
 const SeminarsPage: React.FC = () => {
+  const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState<'all' | 'zoom' | 'google_meet' | 'teams'>('all');
+
+  useEffect(() => {
+    const fetchSeminars = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/seminars');
+        const data = await response.json();
+        setSeminars(data);
+      } catch (error) {
+        console.error('Error fetching seminars:', error);
+      }
+    };
+
+    fetchSeminars();
+  }, []);
 
   const handleJoinSeminar = (seminar: Seminar) => {
     window.open(seminar.link, '_blank');
   };
 
-  const filteredSeminars = mockSeminars.filter(seminar => {
+  const filteredSeminars = seminars.filter(seminar => {
     const matchesSearch = 
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.speaker.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesPlatform = selectedPlatform === 'all' || seminar.platform === selectedPlatform;
-    
+
     return matchesSearch && matchesPlatform;
   });
 
