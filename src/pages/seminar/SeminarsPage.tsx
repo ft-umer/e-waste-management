@@ -7,52 +7,32 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { Seminar } from "../../types";
 import axios from "axios";
-import { toast } from "react-toastify";
 
 const SeminarsPage: React.FC = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState<"all" | "zoom" | "google_meet" | "teams">("all");
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    "all" | "zoom" | "google_meet" | "teams"
+  >("all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Remove seminar by ID (for past seminar delete)
-  const handleRemoveSeminar = async (id: string) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        toast.error("Missing token. Please log in again.");
-        return;
-      }
-
-      // Call the API to delete the seminar
-      await axios.delete(`http://localhost:5000/api/seminars/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // After successful deletion, update the local state
-      setSeminars((prev) => prev.filter((seminar) => seminar._id !== id));
-      toast.success("Seminar deleted successfully.");
-    } catch (err: any) {
-      toast.error("Failed to delete seminar. Please try again.");
-      console.error("Delete error:", err);
-    }
-  };
+// Handler to remove a seminar by its ID
+const handleRemoveSeminar = (id: string) => {
+  setSeminars((prev) => prev.filter((seminar) => seminar._id !== id));
+};
 
   // Fetch seminars from backend
   useEffect(() => {
     const fetchSeminars = async () => {
       try {
-        const res = await axios.get("https://backend-e-waste-management.vercel.app/api/seminars");
+        const res = await axios.get("http://localhost:5000/api/seminars");
         setSeminars(res.data);
+        setLoading(false);
       } catch (err) {
         console.error("Error fetching seminars:", err);
         setError("Failed to load seminars.");
-      } finally {
         setLoading(false);
       }
     };
@@ -81,13 +61,6 @@ const SeminarsPage: React.FC = () => {
 
     return matchesSearch && matchesPlatform;
   });
-
-  const upcomingSeminars = filteredSeminars.filter(
-    (seminar) => new Date(seminar.date) > new Date()
-  );
-  const pastSeminars = filteredSeminars.filter(
-    (seminar) => new Date(seminar.date) <= new Date()
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -149,13 +122,10 @@ const SeminarsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Seminar Sections */}
         {loading ? (
-          <p className="text-gray-600">Loading seminars...</p>
+          <p>Loading seminars...</p>
         ) : error ? (
           <p className="text-red-600">{error}</p>
-        ) : filteredSeminars.length === 0 ? (
-          <p className="text-gray-600 text-center">No seminars found.</p>
         ) : (
           <>
             {/* Upcoming Seminars */}
@@ -167,19 +137,17 @@ const SeminarsPage: React.FC = () => {
                 </h2>
               </div>
 
-              {upcomingSeminars.length === 0 ? (
-                <p className="text-gray-500">No upcoming seminars available.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {upcomingSeminars.map((seminar) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSeminars
+                  .filter((seminar) => new Date(seminar.date) > new Date())
+                  .map((seminar) => (
                     <SeminarCard
-                      key={seminar._id}
+                      key={seminar.id}
                       seminar={seminar}
                       onJoin={handleJoinSeminar}
                     />
                   ))}
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Past Seminars */}
@@ -190,20 +158,18 @@ const SeminarsPage: React.FC = () => {
                 </h2>
               </div>
 
-              {pastSeminars.length === 0 ? (
-                <p className="text-gray-500">No past seminars available.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pastSeminars.map((seminar) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSeminars
+                  .filter((seminar) => new Date(seminar.date) <= new Date())
+                  .map((seminar) => (
                     <SeminarCard
-                      key={seminar._id}
+                      key={seminar.id}
                       seminar={seminar}
                       onJoin={handleJoinSeminar}
-                      onRemove={handleRemoveSeminar} // Pass the remove handler
+                       onRemove={handleRemoveSeminar} // 👈 pass the remover
                     />
                   ))}
-                </div>
-              )}
+              </div>
             </div>
           </>
         )}

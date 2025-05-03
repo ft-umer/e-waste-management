@@ -15,7 +15,13 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin, onRemove }) 
   const isUpcoming = new Date(seminar.date) > new Date();
   const [isAdmin, setIsAdmin] = useState(false);
 
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setIsAdmin(role === "admin");
+  }, []);
+  
   const { deleteSeminar } = useDeleteSeminar();
+
 
   const handleRemovePastSeminars = () => {
     deleteSeminar(seminar._id, () => {
@@ -23,10 +29,7 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin, onRemove }) 
     });
   };
 
-  useEffect(() => {
-    const role = localStorage.getItem("role");
-    setIsAdmin(role === "admin");
-  }, []);
+ 
 
   return (
     <motion.div

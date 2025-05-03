@@ -17,7 +17,7 @@ const ListWastePage: React.FC = () => {
   useEffect(() => {
     const fetchWasteItems = async () => {
       try {
-        const response = await fetch('https://backend-e-waste-management.vercel.app/api/waste');
+        const response = await fetch('http://localhost:5000/api/waste');
         const data = await response.json();
         setWasteItems(data);
       } catch (error) {
