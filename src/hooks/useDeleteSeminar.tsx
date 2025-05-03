@@ -13,7 +13,7 @@ export const useDeleteSeminar = () => {
           return;
         }
 
-        const response = await axios.delete(`http://localhost:5000/api/seminars/${id}`, {
+        const response = await axios.delete(`https://backend-e-waste-management.vercel.app/api/seminars/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

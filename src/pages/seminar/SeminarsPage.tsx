@@ -27,7 +27,7 @@ const handleRemoveSeminar = (id: string) => {
   useEffect(() => {
     const fetchSeminars = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/seminars");
+        const res = await axios.get("https://backend-e-waste-management.vercel.app/api/seminars");
         setSeminars(res.data);
         setLoading(false);
       } catch (err) {
