@@ -1,16 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Users, Video, ExternalLink } from 'lucide-react';
 import { Seminar } from '../../../types';
+import { useDeleteSeminar } from "../../../hooks/useDeleteSeminar";
 import Button from '../../ui/Button';
 
 interface SeminarCardProps {
   seminar: Seminar;
   onJoin: (seminar: Seminar) => void;
+  onRemove?: (id: string) => void; // Only for past seminars
 }
 
-const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin }) => {
+const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin, onRemove }) => {
   const isUpcoming = new Date(seminar.date) > new Date();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const { deleteSeminar } = useDeleteSeminar();
+
+  const handleRemovePastSeminars = () => {
+    deleteSeminar(seminar._id, () => {
+      if (onRemove) onRemove(seminar._id);
+    });
+  };
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setIsAdmin(role === "admin");
+  }, []);
 
   return (
     <motion.div
@@ -20,8 +36,8 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin }) => {
       className="bg-white rounded-lg shadow-md overflow-hidden"
     >
       {seminar.image && (
-        <img 
-          src={seminar.image} 
+        <img
+          src={seminar.image}
           alt={seminar.title}
           className="w-full h-48 object-cover"
         />
@@ -51,8 +67,6 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin }) => {
             <Video className="h-4 w-4 mr-2" />
             <span className="text-sm capitalize">{seminar.platform.replace('_', ' ')}</span>
           </div>
-
-         
         </div>
 
         <div className="space-y-3">
@@ -65,15 +79,15 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onJoin }) => {
             >
               Join Seminar
             </Button>
-          ) : seminar.recordingUrl && (
-            <Button
-              variant="outline"
-              onClick={() => window.open(seminar.recordingUrl, '_blank')}
-              fullWidth
-              icon={<Video className="h-4 w-4" />}
-            >
-              Watch Recording
-            </Button>
+          ) : (
+            isAdmin && (
+              <Button
+                onClick={handleRemovePastSeminars}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Remove
+              </Button>
+            )
           )}
         </div>
       </div>

@@ -1,35 +1,35 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Clock, Tag, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { WasteItem } from '../../../types';
-import Button from '../../ui/Button';
+import React from "react";
+import { motion } from "framer-motion";
+import { MapPin, Clock, Tag, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { WasteItem } from "../../../types";
+import Button from "../../ui/Button";
 
 interface WasteItemCardProps {
   item: WasteItem;
-  onAction: (action: 'pickup' | 'buy' | 'recycle', item: WasteItem) => void;
+  onAction: (action: "pickup" | "buy" | "recycle", item: WasteItem) => void;
 }
 
 const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
-  const isRepairable = item.condition === 'repairable';
-  const isDamaged = item.condition === 'damaged';
+  const isRepairable = item.condition === "repairable";
+  const isDamaged = item.condition === "damaged";
 
-  const getStatusColor = (status: WasteItem['status']) => {
+  const getStatusColor = (status: WasteItem["status"]) => {
     switch (status) {
-      case 'listed':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending_pickup':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'in_transit':
-        return 'bg-purple-100 text-purple-800';
-      case 'with_mechanic':
-        return 'bg-orange-100 text-orange-800';
-      case 'with_recycler':
-        return 'bg-green-100 text-green-800';
-      case 'completed':
-        return 'bg-gray-100 text-gray-800';
+      case "listed":
+        return "bg-blue-100 text-blue-800";
+      case "pending_pickup":
+        return "bg-yellow-100 text-yellow-800";
+      case "in_transit":
+        return "bg-purple-100 text-purple-800";
+      case "with_mechanic":
+        return "bg-orange-100 text-orange-800";
+      case "with_recycler":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -41,27 +41,33 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
       className="bg-white rounded-lg shadow-md overflow-hidden"
     >
       <div className="relative">
-        <img 
-          src={item.images[0]} 
+        <img
+          src={item.images[0]}
           alt={item.title}
           className="w-full h-48 object-cover"
         />
         <div className="absolute top-4 right-4">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-            {item.status.replace('_', ' ').toUpperCase()}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+              item.status
+            )}`}
+          >
+            {(item.status || "").replace("_", " ").toUpperCase()}
           </span>
         </div>
       </div>
 
       <div className="p-6">
         <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-        
+
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-gray-600">
             <MapPin className="h-4 w-4 mr-2" />
-            <span className="text-sm">{item.location.address}</span>
+            <span className="text-sm">
+              {item.location?.address || "Address not available"}
+            </span>
           </div>
-          
+
           <div className="flex items-center text-gray-600">
             <Clock className="h-4 w-4 mr-2" />
             <span className="text-sm">
@@ -97,7 +103,7 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
               </Button>
             </Link>
           )}
-          
+
           {isDamaged && (
             <Link to={`/waste/recycle/${item.id}`} className="flex-1">
               <Button variant="accent" fullWidth>

@@ -1,59 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import WasteItemCard from '../../components/features/waste/WasteItemCard';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { WasteItem, WasteCategory } from '../../types';
-
-// Mock data - replace with actual API call
-const mockWasteItems: WasteItem[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    title: 'Old LED Bulbs',
-    description: 'Pack of 5 LED bulbs that need repair',
-    category: 'bulbs',
-    condition: 'repairable',
-    images: ['https://images.pexels.com/photos/577514/pexels-photo-577514.jpeg'],
-    price: 200,
-    status: 'listed',
-    location: {
-      address: 'Gandhi Nagar, Delhi',
-      coordinates: { lat: 28.6139, lng: 77.2090 }
-    },
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    title: 'Damaged Laptop',
-    description: 'HP laptop with broken screen',
-    category: 'computers',
-    condition: 'damaged',
-    images: ['https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg'],
-    weight: 2.5,
-    status: 'listed',
-    location: {
-      address: 'Sector 18, Noida',
-      coordinates: { lat: 28.5707, lng: 77.3219 }
-    },
-    createdAt: new Date().toISOString()
-  }
-];
+import { WasteItem } from '../../types';
 
 const ListWastePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<WasteCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all');
   const [selectedCondition, setSelectedCondition] = useState<'all' | 'repairable' | 'damaged'>('all');
+  const [wasteItems, setWasteItems] = useState<WasteItem[]>([]);
+
+  // Fetch waste items from the API
+  useEffect(() => {
+    const fetchWasteItems = async () => {
+      try {
+        const response = await fetch('https://backend-e-waste-management.vercel.app/api/waste');
+        const data = await response.json();
+        setWasteItems(data);
+      } catch (error) {
+        console.error('Error fetching waste items:', error);
+      }
+    };
+
+    fetchWasteItems();
+  }, []);
 
   const handleAction = (action: 'pickup' | 'buy' | 'recycle', item: WasteItem) => {
     console.log(`Action: ${action}`, item);
     // Implement action handling
   };
 
-  const filteredItems = mockWasteItems.filter(item => {
+  const filteredItems = wasteItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
@@ -101,23 +81,16 @@ const ListWastePage: React.FC = () => {
             <select
               className="rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500"
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value as WasteCategory | 'all')}
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="all">All Categories</option>
-              <option value="bulbs">Bulbs</option>
-              <option value="wires">Wires</option>
-              <option value="batteries">Batteries</option>
-              <option value="electronics">Electronics</option>
-              <option value="appliances">Appliances</option>
-              <option value="computers">Computers</option>
-              <option value="phones">Phones</option>
-              <option value="other">Other</option>
+              {/* Add more options here */}
             </select>
 
             <select
               className="rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500"
-              value={selectedCondition}
-              onChange={(e) => setSelectedCondition(e.target.value as 'all' | 'repairable' | 'damaged')}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="all">All Conditions</option>
               <option value="repairable">Repairable</option>

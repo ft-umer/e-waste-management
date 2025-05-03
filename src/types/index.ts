@@ -65,6 +65,18 @@ export interface Pickup {
   createdAt: string;
 }
 
+export interface PickupRequest {
+  id: string;
+  userId: string;
+  address: string;
+  scheduledDate: string; // ISO format: YYYY-MM-DD
+  scheduledTimeSlot: string; // e.g., "9 AM - 11 AM"
+  items: Pickup[];
+  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type PickupStatus = 
   | 'pending'
   | 'accepted'

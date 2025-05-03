@@ -16,6 +16,8 @@ const CreateSeminarPage: React.FC = () => {
     platform: 'zoom',
     link: ''
   });
+  
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

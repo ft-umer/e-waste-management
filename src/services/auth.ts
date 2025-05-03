@@ -1,11 +1,12 @@
 import axios from 'axios';
-const API_URL = 'https://backend-e-waste-management.vercel.app/api/auth';
+const API_URL = 'http://localhost:5000/api/auth';
 
 // Sign In function using axios
 export const signIn = async (email: string, password: string) => {
   console.log("Sending to backend:", { email, password });
 
   try {
+    
     const res = await axios.post(`${API_URL}/login`, { email, password }, {
       headers: {
         'Content-Type': 'application/json'
@@ -13,12 +14,15 @@ export const signIn = async (email: string, password: string) => {
     });
 
     const { token, user } = res.data;
-    localStorage.setItem('token', token); // Save token to localStorage
-    localStorage.setItem('user', JSON.stringify(user)); // Save user data to localStorage
-    return user;
-  } catch (error: any) {
-    console.error('Sign in error:', error.response?.data); // Log the response error
-    throw new Error(error.response?.data?.message || 'Login failed');
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', user.role); // 🔑 Store role here
+    localStorage.setItem('user', JSON.stringify(user)); // Optional: full user
+
+    // Redirect or show success
+  } catch (err) {
+    console.error(err);
+    alert('Login failed!');
   }
 };
 

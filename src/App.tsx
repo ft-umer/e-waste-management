@@ -1,4 +1,6 @@
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
@@ -9,6 +11,9 @@ import EducationPage from "./pages/EducationPage";
 import PickupRequestPage from "./pages/PickupRequestPage";
 import SignInPage from "./pages/SignInPage";
 import ListWastePage from "./pages/waste/ListWastePage";
+
+import RiderDashboardPage from './pages/rider/riderDashboardPage';
+import AddWasteItemPage from "./pages/waste/addWasteItemPage";
 import RecycleFormPage from "./pages/waste/RecycleFromPage";
 import BuyFormPage from "./pages/waste/BuyFormPage";
 import SeminarsPage from "./pages/seminar/SeminarsPage";
@@ -19,6 +24,7 @@ import Footer from "./components/layout/Footer";
 import DashboardPage from "./pages/DashBoardPage";
 import "./index.css";
 import PrivateRoute from "./components/PrivateRoute";
+import RiderSignupPage from "./pages/rider/RiderSignUpPage";
 
 function App() {
   return (
@@ -90,11 +96,23 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/waste/new"
+              element={
+                <PrivateRoute>
+                  <AddWasteItemPage />
+                </PrivateRoute>
+              }
+            />
+            
+           
+            <Route path="/rider/signup" element={<RiderSignupPage />} />
+            <Route path="/rider/dashboard" element={<RiderDashboardPage />} />
             {/* Add more routes as needed */}
           </Routes>
         </main>
         <Footer />
-        <Toaster position="top-right" />
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </Router>
   );

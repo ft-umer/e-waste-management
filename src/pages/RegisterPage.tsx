@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { signUp } from '../services/auth';
+import { toast } from 'react-toastify';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -52,6 +53,9 @@ const RegisterPage: React.FC = () => {
         navigate('/signin');
       }
     } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || 'Registration failed. Please try again.'
+      );
       setErrorMessage(error?.response?.data?.message || 'Registration failed');
     } finally {
       setIsLoading(false);

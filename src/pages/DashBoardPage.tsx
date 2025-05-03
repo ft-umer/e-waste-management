@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Package, Truck, Award, ArrowRight, Clock, MapPin } from 'lucide-react';
 import { pickupRequests } from '../data/mockData';
@@ -6,8 +6,33 @@ import Button from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 import PickupDetailsModal from '../components/features/dashboard/PickupDetailsModal';
 import { PickupRequest } from '../types';
+import axios from 'axios';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  // Add other fields if needed
+}
 
 const DashboardPage: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId'); // or sessionStorage.getItem()
+    
+    if (userId) {
+      axios.get<User[]>('/api/getUsers') // your actual endpoint
+        .then((res) => {
+          const user = res.data.find(u => u.id === userId);
+          setCurrentUser(user || null);
+        })
+        .catch((err) => {
+          console.error('Error fetching users:', err);
+        });
+    }
+  }, []);
+  
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [selectedPickup, setSelectedPickup] = useState<PickupRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +67,7 @@ const DashboardPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold mb-2">Welcome back, John!</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {currentUser?.name || 'Guest'}!</h1>
             <p className="text-lg opacity-90">
               Track your recycling impact and manage your pickups
             </p>

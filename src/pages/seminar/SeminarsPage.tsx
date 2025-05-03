@@ -1,46 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Calendar, Video, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import SeminarCard from '../../components/features/seminar/SeminarCard';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import { Seminar } from '../../types';
-
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Calendar, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import SeminarCard from "../../components/features/seminar/SeminarCard";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import { Seminar } from "../../types";
+import axios from "axios";
 
 const SeminarsPage: React.FC = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState<'all' | 'zoom' | 'google_meet' | 'teams'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    "all" | "zoom" | "google_meet" | "teams"
+  >("all");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // Remove seminar by ID (for past seminar delete)
+  const handleRemoveSeminar = (id: string) => {
+    setSeminars((prev) => prev.filter((seminar) => seminar._id !== id));
+  };
+
+  // Fetch seminars from backend
   useEffect(() => {
     const fetchSeminars = async () => {
       try {
-        const response = await fetch('https://backend-e-waste-management.vercel.app/api/seminars');
-        const data = await response.json();
-        setSeminars(data);
-      } catch (error) {
-        console.error('Error fetching seminars:', error);
+        const res = await axios.get("https://backend-e-waste-management.vercel.app/api/seminars");
+        setSeminars(res.data);
+      } catch (err) {
+        console.error("Error fetching seminars:", err);
+        setError("Failed to load seminars.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchSeminars();
   }, []);
 
+  // Detect admin role
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setIsAdmin(role === "admin");
+  }, []);
+
   const handleJoinSeminar = (seminar: Seminar) => {
-    window.open(seminar.link, '_blank');
+    window.open(seminar.link, "_blank");
   };
 
-  const filteredSeminars = seminars.filter(seminar => {
-    const matchesSearch = 
+  const filteredSeminars = seminars.filter((seminar) => {
+    const matchesSearch =
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.speaker.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesPlatform = selectedPlatform === 'all' || seminar.platform === selectedPlatform;
+    const matchesPlatform =
+      selectedPlatform === "all" || seminar.platform === selectedPlatform;
 
     return matchesSearch && matchesPlatform;
   });
+
+  const upcomingSeminars = filteredSeminars.filter(
+    (seminar) => new Date(seminar.date) > new Date()
+  );
+  const pastSeminars = filteredSeminars.filter(
+    (seminar) => new Date(seminar.date) <= new Date()
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -52,19 +79,26 @@ const SeminarsPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">E-Waste Management Seminars</h1>
-            <p className="text-gray-600">Join our expert-led sessions to learn about proper e-waste disposal</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              E-Waste Management Seminars
+            </h1>
+            <p className="text-gray-600">
+              Join our expert-led sessions to learn about proper e-waste
+              disposal
+            </p>
           </motion.div>
 
-          <Link to="/seminars/new">
-            <Button
-              variant="primary"
-              icon={<Plus className="h-5 w-5" />}
-              className="mt-4 md:mt-0"
-            >
-              Schedule Seminar
-            </Button>
-          </Link>
+          {isAdmin && (
+            <Link to="/seminars/new">
+              <Button
+                variant="primary"
+                icon={<Plus className="h-5 w-5" />}
+                className="mt-4 md:mt-0"
+              >
+                Schedule Seminar
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Filters */}
@@ -81,7 +115,11 @@ const SeminarsPage: React.FC = () => {
             <select
               className="rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500"
               value={selectedPlatform}
-              onChange={(e) => setSelectedPlatform(e.target.value as 'all' | 'zoom' | 'google_meet' | 'teams')}
+              onChange={(e) =>
+                setSelectedPlatform(
+                  e.target.value as "all" | "zoom" | "google_meet" | "teams"
+                )
+              }
             >
               <option value="all">All Platforms</option>
               <option value="zoom">Zoom</option>
@@ -91,45 +129,64 @@ const SeminarsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Upcoming Seminars */}
-        <div className="mb-12">
-          <div className="flex items-center mb-6">
-            <Calendar className="h-6 w-6 text-green-600 mr-2" />
-            <h2 className="text-2xl font-semibold text-gray-900">Upcoming Seminars</h2>
-          </div>
+        {/* Seminar Sections */}
+        {loading ? (
+          <p className="text-gray-600">Loading seminars...</p>
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
+        ) : filteredSeminars.length === 0 ? (
+          <p className="text-gray-600 text-center">No seminars found.</p>
+        ) : (
+          <>
+            {/* Upcoming Seminars */}
+            <div className="mb-12">
+              <div className="flex items-center mb-6">
+                <Calendar className="h-6 w-6 text-green-600 mr-2" />
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Upcoming Seminars
+                </h2>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSeminars
-              .filter(seminar => new Date(seminar.date) > new Date())
-              .map((seminar) => (
-                <SeminarCard
-                  key={seminar.id}
-                  seminar={seminar}
-                  onJoin={handleJoinSeminar}
-                />
-              ))}
-          </div>
-        </div>
+              {upcomingSeminars.length === 0 ? (
+                <p className="text-gray-500">No upcoming seminars available.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {upcomingSeminars.map((seminar) => (
+                    <SeminarCard
+                      key={seminar._id}
+                      seminar={seminar}
+                      onJoin={handleJoinSeminar}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
 
-        {/* Past Recordings */}
-        <div>
-          <div className="flex items-center mb-6">
-            <Video className="h-6 w-6 text-green-600 mr-2" />
-            <h2 className="text-2xl font-semibold text-gray-900">Past Recordings</h2>
-          </div>
+            {/* Past Seminars */}
+            <div>
+              <div className="flex items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Previous Seminars
+                </h2>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSeminars
-              .filter(seminar => new Date(seminar.date) <= new Date())
-              .map((seminar) => (
-                <SeminarCard
-                  key={seminar.id}
-                  seminar={seminar}
-                  onJoin={handleJoinSeminar}
-                />
-              ))}
-          </div>
-        </div>
+              {pastSeminars.length === 0 ? (
+                <p className="text-gray-500">No past seminars available.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pastSeminars.map((seminar) => (
+                    <SeminarCard
+                      key={seminar._id}
+                      seminar={seminar}
+                      onJoin={handleJoinSeminar}
+                      onRemove={handleRemoveSeminar}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

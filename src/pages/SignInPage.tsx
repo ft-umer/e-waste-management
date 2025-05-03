@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 // ...other imports
 import { signIn } from '../services/auth';
+import { toast } from 'react-toastify';
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,6 +31,9 @@ const SignInPage: React.FC = () => {
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Sign in error:', error);
+      toast.error(
+        error.response?.data?.message || 'Login failed. Please try again.'
+      );
       setErrorMessage(error.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);

@@ -35,7 +35,8 @@ useEffect(() => {
   const handleLogout = () => {
     logout(); // Call logout function to remove token from localStorage
     setIsAuthenticated(false); // Update state to reflect user is logged out
-    localStorage.removeItem('token'); // Remove token from localStorage
+    localStorage.removeItem("token"); // Remove token from localStorage
+
     navigate('/signin'); 
   };
 
@@ -85,7 +86,6 @@ useEffect(() => {
             <Link to="/education" className="text-gray-700 hover:text-green-500 font-medium">Education</Link>
             <Link to="/seminars" className="text-gray-700 hover:text-green-500 font-medium">Seminars</Link>
             <Link to="/waste" className="text-gray-700 hover:text-green-500 font-medium">Waste products</Link>
-            <Link to="/locations" className="text-gray-700 hover:text-green-500 font-medium">Locations</Link>
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
@@ -166,13 +166,7 @@ useEffect(() => {
               >
                 Education
               </Link>
-              <Link
-                to="/locations"
-                className="text-gray-700 hover:text-green-500 font-medium py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Locations
-              </Link>
+             
               <Link
                 to="/seminars"
                 className="text-gray-700 hover:text-green-500 font-medium py-2"
