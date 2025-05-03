@@ -12,7 +12,7 @@ import PickupRequestPage from "./pages/PickupRequestPage";
 import SignInPage from "./pages/SignInPage";
 import ListWastePage from "./pages/waste/ListWastePage";
 
-import RiderDashboardPage from './pages/rider/riderDashboardPage';
+import RiderDashboardPage from './pages/rider/RiderDashboardPage';
 import AddWasteItemPage from "./pages/waste/addWasteItemPage";
 import RecycleFormPage from "./pages/waste/RecycleFromPage";
 import BuyFormPage from "./pages/waste/BuyFormPage";
