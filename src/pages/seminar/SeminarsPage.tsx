@@ -7,20 +7,40 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { Seminar } from "../../types";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const SeminarsPage: React.FC = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState<
-    "all" | "zoom" | "google_meet" | "teams"
-  >("all");
+  const [selectedPlatform, setSelectedPlatform] = useState<"all" | "zoom" | "google_meet" | "teams">("all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Remove seminar by ID (for past seminar delete)
-  const handleRemoveSeminar = (id: string) => {
-    setSeminars((prev) => prev.filter((seminar) => seminar._id !== id));
+  const handleRemoveSeminar = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Missing token. Please log in again.");
+        return;
+      }
+
+      // Call the API to delete the seminar
+      await axios.delete(`http://localhost:5000/api/seminars/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // After successful deletion, update the local state
+      setSeminars((prev) => prev.filter((seminar) => seminar._id !== id));
+      toast.success("Seminar deleted successfully.");
+    } catch (err: any) {
+      toast.error("Failed to delete seminar. Please try again.");
+      console.error("Delete error:", err);
+    }
   };
 
   // Fetch seminars from backend
@@ -179,7 +199,7 @@ const SeminarsPage: React.FC = () => {
                       key={seminar._id}
                       seminar={seminar}
                       onJoin={handleJoinSeminar}
-                      onRemove={handleRemoveSeminar}
+                      onRemove={handleRemoveSeminar} // Pass the remove handler
                     />
                   ))}
                 </div>

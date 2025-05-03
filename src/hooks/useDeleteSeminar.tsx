@@ -13,14 +13,18 @@ export const useDeleteSeminar = () => {
           return;
         }
 
-        await axios.delete(`https://backend-e-waste-management.vercel.app/api/seminars/${id}`, {
+        const response = await axios.delete(`http://localhost:5000/api/seminars/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        toast.success("Seminar deleted successfully.");
-        if (onSuccess) onSuccess();
+        if (response.status === 200) {
+          toast.success("Seminar deleted successfully.");
+          if (onSuccess) onSuccess();
+        } else {
+          toast.error("Failed to delete seminar.");
+        }
       } catch (err: any) {
         toast.error("Failed to delete seminar. Please try again.");
         console.error("Delete error:", err);
