@@ -17,30 +17,39 @@ const CreateSeminarPage: React.FC = () => {
     link: ''
   });
   
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const token = localStorage.getItem("token"); // ✅ Get the actual token
+    if (!token) {
+      console.error('No token found. Please log in.');
+      return;
+    }
+    
     try {
-      const res = await fetch('https://backend-e-waste-management.vercel.app/api/seminars', {
+      const res = await fetch('http://localhost:5000/api/seminars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // ✅ Correct usage of token
         },
         body: JSON.stringify(formData),
       });
-  
+    
       if (res.ok) {
         const data = await res.json();
         console.log('Seminar created:', data);
         navigate('/seminars');
       } else {
-        console.error('Failed to create seminar');
+        console.error('Failed to create seminar:', await res.text());
       }
     } catch (err) {
       console.error('Error creating seminar:', err);
     }
+    
   };
+  
   
 
   return (
