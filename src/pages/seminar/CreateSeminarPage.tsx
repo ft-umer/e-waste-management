@@ -28,7 +28,7 @@ const CreateSeminarPage: React.FC = () => {
     }
     
     try {
-      const res = await fetch('http://localhost:5000/api/seminars', {
+      const res = await fetch('https://backend-e-waste-management.vercel.app/api/seminars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

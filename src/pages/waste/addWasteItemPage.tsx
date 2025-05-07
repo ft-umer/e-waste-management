@@ -10,6 +10,12 @@ import Input from '../../components/ui/Input';
 import { WasteCategory, WasteCondition } from '../../types';
 import { classifyImage } from '../../utils/classifyImage';
 import { toast } from 'react-toastify';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  id: string; // Replace 'id' with the actual key(s) in your token payload
+  // Add other properties as needed
+}
 
 const AddWasteItemPage: React.FC = () => {
   const navigate = useNavigate();
@@ -41,17 +47,28 @@ const AddWasteItemPage: React.FC = () => {
       const res = await axios.post('https://api.cloudinary.com/v1_1/dtipim18j/image/upload', formDataImage);
       const imageUrl = res.data.secure_url;
   
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to submit a listing.');
+        return;
+      }
+  
+      const decoded = jwtDecode<DecodedToken>(token);
+      const userId = decoded.id; // Adjust to match your token structure (_id, userId, etc.)
       // 🔍 Call Gemini to classify
       const classification = await classifyImage(imageUrl);
       toast.success(`Image classified as: ${classification}`);
     //   alert(`Image classified as: ${classification}`);
   
+ 
       setFormData(prev => ({
+        user: userId, // ✅ Add user manually for dev/testing
         ...prev,
         images: [...prev.images, imageUrl],
         condition: classification === 'repairable'
           ? classification
-          : prev.condition // Keep the previous condition if classification is not valid
+          : prev.condition 
+          
       }));
     } catch (error) {
       console.error('Image upload or classification failed:', error);
@@ -84,9 +101,9 @@ const AddWasteItemPage: React.FC = () => {
         formData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // ✅ Include token
+          },
         }
       );
 

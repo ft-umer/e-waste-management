@@ -14,9 +14,7 @@ export const useDeleteSeminar = () => {
         }
 
         const response = await axios.delete(`https://backend-e-waste-management.vercel.app/api/seminars/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          
         });
 
         if (response.status === 200) {
