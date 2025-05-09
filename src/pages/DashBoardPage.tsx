@@ -75,22 +75,32 @@ const DashboardPage: React.FC = () => {
       })
       .catch((err) => console.error("Error fetching pickups:", err));
 
-      axios
+    axios
       .get(`https://backend-e-waste.vercel.app/api/waste/user/${userId}`)
       .then((res) => {
-        console.log("Fetched waste items:", res.data); // Inspect this data
-    
+        console.log("Fetched waste items:", res.data); // Inspect the data from backend
+
+        if (res.data.length === 0) {
+          console.log("No waste items found for this user.");
+        }
+
         const allItems = Array.isArray(res.data) ? res.data : [];
-    
-        // Convert userId (from waste item) and userId (from localStorage) to strings for comparison
-        const userItems = allItems.filter((item) => item.user === userId);
-    
-        setWasteItems(userItems);
-        console.log("Filtered waste items:", userItems);
+
+        // Filter based on the userId from localStorage
+        const userItems = allItems.filter((item) => {
+          const itemUserId = item.user && item.user.toString(); // Ensure item.user is a string
+          console.log("Item userId:", itemUserId); // Log each item’s userId
+
+          return itemUserId === userId;
+        });
+
+        console.log("Filtered waste items:", userItems); // Log filtered items
+
+        setWasteItems(userItems); // Set state with filtered items
       })
-      .catch((err) => console.error("Error fetching waste items:", err));
-    
-    
+      .catch((err) => {
+        console.error("Error fetching waste items:", err);
+      });
   }, []);
 
   // Calculated stats

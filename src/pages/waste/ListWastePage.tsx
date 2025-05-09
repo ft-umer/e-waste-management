@@ -12,6 +12,7 @@ const ListWastePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all');
   const [selectedCondition, setSelectedCondition] = useState<'all' | 'repairable' | 'damaged'>('all');
   const [wasteItems, setWasteItems] = useState<WasteItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch waste items from the API
   useEffect(() => {
@@ -20,6 +21,7 @@ const ListWastePage: React.FC = () => {
         const response = await fetch('https://backend-e-waste-management.vercel.app/api/waste');
         const data = await response.json();
         setWasteItems(data);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching waste items:', error);
       }

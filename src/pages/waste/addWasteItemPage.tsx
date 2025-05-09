@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
-  Camera, MapPin, Package, Info, Upload, Plus, Trash2
-} from 'lucide-react';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import { WasteCategory, WasteCondition } from '../../types';
-import { classifyImage } from '../../utils/classifyImage';
-import { toast } from 'react-toastify';
-import { jwtDecode } from 'jwt-decode';
+  Camera,
+  MapPin,
+  Package,
+  Info,
+  Upload,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import { WasteCategory, WasteCondition } from "../../types";
+import { classifyImage } from "../../utils/classifyImage";
+import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 interface DecodedToken {
   id: string; // Replace 'id' with the actual key(s) in your token payload
@@ -21,95 +27,105 @@ const AddWasteItemPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '' as WasteCategory,
-    condition: '' as WasteCondition,
+    title: "",
+    description: "",
+    category: "" as WasteCategory,
+    condition: "" as WasteCondition,
     images: [] as string[],
-    price: '',
-    weight: '',
-    address: '',
-    coordinates: { lat: 0, lng: 0 }
+    price: "",
+    weight: "",
+    address: "",
+    coordinates: { lat: 0, lng: 0 },
   });
 
   const [loadingImage, setLoadingImage] = useState(false);
   const handleImageAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     const formDataImage = new FormData();
-    formDataImage.append('file', file);
-    formDataImage.append('upload_preset', 'waste_products');
-  
+    formDataImage.append("file", file);
+    formDataImage.append("upload_preset", "waste_products");
+
     try {
       setLoadingImage(true);
-      const res = await axios.post('https://api.cloudinary.com/v1_1/dtipim18j/image/upload', formDataImage);
+      const res = await axios.post(
+        "https://api.cloudinary.com/v1_1/dtipim18j/image/upload",
+        formDataImage
+      );
       const imageUrl = res.data.secure_url;
-      
-      const token = localStorage.getItem('token');
+
+      const token = localStorage.getItem("token");
       if (!token) {
-        alert('You must be logged in to submit a listing.');
+        alert("You must be logged in to submit a listing.");
         return;
       }
-  
+
       const decoded = jwtDecode<DecodedToken>(token);
       const userId = decoded.id; // Adjust to match your token structure (_id, userId, etc.)
       // Log the image URL to verify it's correct
       console.log("Cloudinary Image URL:", imageUrl);
-  
+
       // Proceed with classification
       const classification = await classifyImage(imageUrl);
       toast.success(`Image classified as: ${classification}`);
-  
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         user: userId,
         ...prev,
         images: [...prev.images, imageUrl],
-        condition: classification === 'repairable' ? classification : prev.condition
+        condition:
+          classification === "repairable" ? classification : prev.condition,
       }));
     } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Image upload failed. Try again.');
+      console.error("Image upload failed:", error);
+      toast.error("Image upload failed. Try again.");
     } finally {
       setLoadingImage(false);
     }
   };
-  
 
   const handleImageRemove = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        alert('You must be logged in to submit a listing.');
+        alert("You must be logged in to submit a listing.");
         return;
       }
 
+      // Decode the token to get user ID
+      const decoded = jwtDecode<DecodedToken>(token);
+      const userId = decoded.id; // Replace with the actual key from your token
+
+      // Add the userId to the form data before sending the request
+      const formDataWithUser = { ...formData, user: userId };
+      console.log("Form data with user ID:", formDataWithUser);
+      
 
       const res = await axios.post(
-        'https://backend-e-waste-management.vercel.app/api/waste',
-        formData,
+        "https://backend-e-waste.vercel.app/api/waste",
+        formDataWithUser, // Send formData with userId
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`, // ✅ Include token
+            Authorization: `Bearer ${token}`, // ✅ Include token
           },
         }
       );
 
-      console.log('Waste item listed:', res.data);
-      navigate('/waste');
+      console.log("Waste item listed:", res.data);
+      navigate("/waste");
     } catch (err) {
-      console.error('Error listing item:', err);
-      alert('Failed to submit. Please check form or login again.');
+      console.error("Error listing item:", err);
+      alert("Failed to submit. Please check form or login again.");
     }
   };
 
@@ -124,8 +140,12 @@ const AddWasteItemPage: React.FC = () => {
         >
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6 bg-gray-50 border-b">
-              <h2 className="text-2xl font-bold text-gray-900">List New Item</h2>
-              <p className="text-gray-600 mt-2">Add your electronic waste item for recycling or repair</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                List New Item
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Add your electronic waste item for recycling or repair
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -133,7 +153,9 @@ const AddWasteItemPage: React.FC = () => {
                 label="Item Title"
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 placeholder="e.g., Old LED Bulbs, Broken Laptop"
                 startIcon={<Package className="h-5 w-5" />}
                 required
@@ -148,7 +170,9 @@ const AddWasteItemPage: React.FC = () => {
                   className="w-full rounded-md border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200"
                   rows={4}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   placeholder="Describe the item's condition, specifications, and any relevant details..."
                   required
                 ></textarea>
@@ -162,7 +186,12 @@ const AddWasteItemPage: React.FC = () => {
                   <select
                     className="w-full rounded-md border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200"
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as WasteCategory })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value as WasteCategory,
+                      })
+                    }
                     required
                   >
                     <option value="">Select category</option>
@@ -184,7 +213,12 @@ const AddWasteItemPage: React.FC = () => {
                   <select
                     className="w-full rounded-md border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200"
                     value={formData.condition}
-                    onChange={(e) => setFormData({ ...formData, condition: e.target.value as WasteCondition })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        condition: e.target.value as WasteCondition,
+                      })
+                    }
                     required
                   >
                     <option value="">Select condition</option>
@@ -197,11 +231,17 @@ const AddWasteItemPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Images
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {formData.images.map((image, index) => (
                     <div key={index} className="relative">
-                      <img src={image} alt={`Preview ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                      <img
+                        src={image}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
                       <button
                         type="button"
                         onClick={() => handleImageRemove(index)}
@@ -228,24 +268,28 @@ const AddWasteItemPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {formData.condition === 'repairable' && (
+                {formData.condition === "repairable" && (
                   <Input
                     label="Price (₹)"
                     type="number"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     placeholder="Enter price"
                     required
                     fullWidth
                   />
                 )}
 
-                {formData.condition === 'damaged' && (
+                {formData.condition === "damaged" && (
                   <Input
                     label="Weight (kg)"
                     type="number"
                     value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
                     placeholder="Approximate weight"
                     required
                     fullWidth
@@ -257,7 +301,9 @@ const AddWasteItemPage: React.FC = () => {
                 label="Location"
                 type="text"
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
                 startIcon={<MapPin className="h-5 w-5" />}
                 placeholder="Enter your address"
                 required
@@ -268,11 +314,15 @@ const AddWasteItemPage: React.FC = () => {
                 <div className="flex items-start">
                   <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="text-sm font-medium text-blue-800">Listing Guidelines</h4>
+                    <h4 className="text-sm font-medium text-blue-800">
+                      Listing Guidelines
+                    </h4>
                     <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
                       <li>Provide clear, well-lit photos of the item</li>
                       <li>Accurately describe the item's condition</li>
-                      <li>Include any relevant measurements or specifications</li>
+                      <li>
+                        Include any relevant measurements or specifications
+                      </li>
                       <li>Be honest about any damage or issues</li>
                     </ul>
                   </div>
@@ -291,7 +341,7 @@ const AddWasteItemPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/waste')}
+                  onClick={() => navigate("/waste")}
                   fullWidth
                 >
                   Cancel
