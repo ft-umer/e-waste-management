@@ -1,20 +1,27 @@
-// components/PrivateRoute.tsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface PrivateRouteProps {
   children: JSX.Element;
+  allowedRoles: string[]; // Must include at least one role: 'user', 'admin', or 'rider'
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles = ["user", "admin"] }) => {
   const token = localStorage.getItem('token');
+  const role = localStorage.getItem('userType'); // Use consistent key name everywhere
+  const location = useLocation();
 
-  if (!token) {
-    // Not logged in: redirect to sign-in page
-    return <Navigate to="/signin" replace />;
+  if (!token || !role) {
+    // Not authenticated
+    return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
-  // Logged in: render the page
+  if (!allowedRoles.includes(role)) {
+    // Authenticated but not authorized
+    return <Navigate to="/rider/login" replace />;
+  }
+  
+
   return children;
 };
 

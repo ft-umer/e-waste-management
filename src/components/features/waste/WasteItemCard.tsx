@@ -20,12 +20,6 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
         return "bg-blue-100 text-blue-800";
       case "pending_pickup":
         return "bg-yellow-100 text-yellow-800";
-      case "in_transit":
-        return "bg-purple-100 text-purple-800";
-      case "with_mechanic":
-        return "bg-orange-100 text-orange-800";
-      case "with_recycler":
-        return "bg-green-100 text-green-800";
       case "completed":
         return "bg-gray-100 text-gray-800";
       default:
@@ -97,7 +91,7 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
 
         <div className="flex space-x-3">
           {isRepairable && (
-            <Link to={`/waste/buy/${item.id}`} className="flex-1">
+            <Link to={`/waste/buy/${item._id}`} className="flex-1">
               <Button variant="primary" fullWidth>
                 Buy for Repair
               </Button>
@@ -105,7 +99,7 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
           )}
 
           {isDamaged && (
-            <Link to={`/waste/recycle/${item.id}`} className="flex-1">
+            <Link to={`/waste/recycle/${item._id}`} className="flex-1">
               <Button variant="accent" fullWidth>
                 Recycle Item
               </Button>

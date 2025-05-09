@@ -8,18 +8,20 @@ export interface User {
   points: number;
   createdAt: string;
 }
-
 export interface WasteItem {
-  id: string;
-  userId: string;
+  _id: string;
   title: string;
   description: string;
-  category: WasteCategory;
-  condition: WasteCondition;
-  images: string[];
-  price?: number;
-  weight?: number;
-  status: WasteStatus;
+  category: string;
+  condition: string;
+  images: string[]; // confirm this is not optional
+  price: string;
+  weight: string;
+  address: string;
+  status: string; // Added the missing 'status' property
+  user: string;
+  createdAt: string;
+  updatedAt: string;
   location: {
     address: string;
     coordinates: {
@@ -27,7 +29,6 @@ export interface WasteItem {
       lng: number;
     };
   };
-  createdAt: string;
 }
 
 export type WasteCategory = 

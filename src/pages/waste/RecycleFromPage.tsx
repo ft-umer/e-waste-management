@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Truck, FileText } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { WasteItem } from '../../types';
+import axios from 'axios';
 
 const RecycleFormPage: React.FC = () => {
   const { id } = useParams();
@@ -15,31 +16,87 @@ const RecycleFormPage: React.FC = () => {
     address: '',
     notes: ''
   });
+  
+  const [wasteItem, setWasteItem] = useState<WasteItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+      console.log("Fetched item id:", id); // Check if the id is coming through correctly
+      const fetchWasteItem = async () => {
+        try {
+          const response = await axios.get(
+            `https://backend-e-waste.vercel.app/api/waste/${id}`
+          );
+          console.log("Fetched waste item:", response.data);
+          if (response.data && response.data._id === id) {
+            setWasteItem(response.data);
+          } else {
+            console.error("Item not found or invalid response.");
+          }
+        } catch (error) {
+          console.error("Error fetching waste item:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      if (id) {
+        fetchWasteItem();
+      } else {
+        setLoading(false); // Set loading to false if id is invalid
+      }
+    }, [id]);
 
   // Mock data - replace with API call
-  const item: WasteItem = {
-    id: '2',
-    userId: 'user2',
+  const mockItem: WasteItem = {
+    _id: '2',
+    user: 'user2',
     title: 'Damaged Laptop',
     description: 'HP laptop with broken screen',
     category: 'computers',
     condition: 'damaged',
     images: ['https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg'],
-    weight: 2.5,
+    weight: "2.5",
     status: 'listed',
     location: {
       address: 'Sector 18, Noida',
       coordinates: { lat: 28.5707, lng: 77.3219 }
     },
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    price: '',
+    address: '',
+    updatedAt: ''
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submit recycling request:', { itemId: id, ...formData });
-    // Implement form submission
-    navigate('/waste');
+  
+    const loggedInUserId = localStorage.getItem("userId"); // ✅ Logged-in user
+
+    if (!loggedInUserId) {
+      alert("User not logged in. Please log in again.");
+      return;
+    }
+    try {
+      const pickupRequest = {
+        userId: loggedInUserId,
+        itemId: wasteItem?._id,
+        address: formData.address,
+        scheduledDate: formData.pickupDate,
+        scheduledTimeSlot: formData.pickupTime,
+        notes: formData.notes,
+      };
+  
+      const response = await axios.post('https://backend-e-waste.vercel.app/api/pickup', pickupRequest);
+      
+      console.log('Pickup request sent:', response.data);
+      alert('Pickup scheduled successfully!');
+      navigate('/waste');
+    } catch (error) {
+      console.error('Error submitting pickup request:', error);
+      alert('Failed to schedule pickup. Please try again.');
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -56,15 +113,15 @@ const RecycleFormPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Recycle Item</h2>
               <div className="flex items-start space-x-4">
                 <img
-                  src={item.images[0]}
-                  alt={item.title}
+                  src={(wasteItem || mockItem).images[0]}
+                  alt={(wasteItem || mockItem).title}
                   className="w-24 h-24 rounded-lg object-cover"
                 />
                 <div>
-                  <h3 className="text-lg font-semibold">{item.title}</h3>
-                  <p className="text-gray-600">{item.description}</p>
+                  <h3 className="text-lg font-semibold">{(wasteItem || mockItem).title}</h3>
+                  <p className="text-gray-600">{(wasteItem || mockItem).description}</p>
                   <p className="text-sm text-gray-500 mt-2">
-                    Weight: {item.weight}kg
+                    Weight: {(wasteItem || mockItem).weight}kg
                   </p>
                 </div>
               </div>

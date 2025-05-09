@@ -101,9 +101,9 @@ const ListWastePage: React.FC = () => {
 
         {/* Items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
+          {wasteItems.map((item) => (
             <WasteItemCard
-              key={item.id}
+              key={item._id}
               item={item}
               onAction={handleAction}
             />

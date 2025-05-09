@@ -1,48 +1,105 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, CreditCard, FileText, Phone, Mail } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import { WasteItem } from '../../types';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  CreditCard,
+  FileText,
+  Phone,
+  Mail,
+} from "lucide-react";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import { WasteItem } from "../../types";
+import axios from "axios";
 
 const BuyFormPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    pickupDate: '',
-    pickupTime: '',
-    notes: ''
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    pickupDate: "",
+    pickupTime: "",
+    notes: "",
   });
 
-  // Mock data - replace with API call
-  const item: WasteItem = {
-    id: '1',
-    userId: 'user1',
-    title: 'Old LED Bulbs',
-    description: 'Pack of 5 LED bulbs that need repair',
-    category: 'bulbs',
-    condition: 'repairable',
-    images: ['https://images.pexels.com/photos/577514/pexels-photo-577514.jpeg'],
-    price: 200,
-    status: 'listed',
-    location: {
-      address: 'Gandhi Nagar, Delhi',
-      coordinates: { lat: 28.6139, lng: 77.2090 }
-    },
-    createdAt: new Date().toISOString()
+  const [item, setItem] = useState<WasteItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    console.log("Fetched item id:", id); // Check if the id is coming through correctly
+    const fetchWasteItem = async () => {
+      try {
+        const response = await axios.get(
+          `https://backend-e-waste.vercel.app/api/waste/${id}`
+        );
+        console.log("Fetched waste item:", response.data);
+        if (response.data && response.data._id === id) {
+          setItem(response.data);
+        } else {
+          console.error("Item not found or invalid response.");
+        }
+      } catch (error) {
+        console.error("Error fetching waste item:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchWasteItem();
+    } else {
+      setLoading(false); // Set loading to false if id is invalid
+    }
+  }, [id]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted"); // Check if the function is triggered
+
+    if (!item) {
+      console.error("Item is not available for submission.");
+      return;
+    }
+
+    const purchaseRequestData = {
+      userId: item.user,
+      itemId: item._id,
+      address: formData.address,
+      scheduledDate: formData.pickupDate,
+      scheduledTimeSlot: formData.pickupTime,
+      notes: formData.notes,
+    };
+
+    try {
+      const response = await axios.post(
+        "https://backend-e-waste.vercel.app/api/purchase",
+        purchaseRequestData
+      );
+      console.log("Buy request submitted:", response.data);
+
+      // Check the status code and handle the response properly
+      if (response.status === 200) {
+        console.log("Form submission success");
+        navigate("/waste"); // Redirect if successful
+      } else {
+        console.error("Failed to submit form:", response.status);
+      }
+    } catch (error) {
+      console.error("Error submitting pickup request:", error);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Submit buy request:', { itemId: id, ...formData });
-    // Implement form submission
-    navigate('/waste');
-  };
+  if (!item)
+    return (
+      <div className="text-center mt-10 text-red-500">Item not found.</div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -54,15 +111,23 @@ const BuyFormPage: React.FC = () => {
           className="max-w-2xl mx-auto"
         >
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Item Preview */}
             <div className="p-6 bg-gray-50 border-b">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Buy for Repair</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Buy for Repair
+              </h2>
               <div className="flex items-start space-x-4">
-                <img
-                  src={item.images[0]}
-                  alt={item.title}
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
+                {item.images?.length > 0 ? (
+                  <img
+                    src={item.images[0]}
+                    alt={item.title}
+                    className="w-24 h-24 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500">
+                    No image
+                  </div>
+                )}
+
                 <div>
                   <h3 className="text-lg font-semibold">{item.title}</h3>
                   <p className="text-gray-600">{item.description}</p>
@@ -73,23 +138,25 @@ const BuyFormPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Buy Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
                   label="Full Name"
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   fullWidth
                 />
-
                 <Input
                   label="Phone Number"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   startIcon={<Phone className="h-5 w-5" />}
                   required
                   fullWidth
@@ -100,7 +167,9 @@ const BuyFormPage: React.FC = () => {
                 label="Email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 startIcon={<Mail className="h-5 w-5" />}
                 required
                 fullWidth
@@ -110,7 +179,9 @@ const BuyFormPage: React.FC = () => {
                 label="Delivery Address"
                 type="text"
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
                 startIcon={<MapPin className="h-5 w-5" />}
                 required
                 fullWidth
@@ -121,7 +192,9 @@ const BuyFormPage: React.FC = () => {
                   label="Preferred Date"
                   type="date"
                   value={formData.pickupDate}
-                  onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pickupDate: e.target.value })
+                  }
                   startIcon={<Calendar className="h-5 w-5" />}
                   required
                   fullWidth
@@ -132,13 +205,15 @@ const BuyFormPage: React.FC = () => {
                     Preferred Time Slot
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
                       <Clock className="h-5 w-5" />
                     </div>
                     <select
                       className="pl-10 w-full rounded-md border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200"
                       value={formData.pickupTime}
-                      onChange={(e) => setFormData({ ...formData, pickupTime: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, pickupTime: e.target.value })
+                      }
                       required
                     >
                       <option value="">Select a time slot</option>
@@ -158,7 +233,9 @@ const BuyFormPage: React.FC = () => {
                   className="w-full rounded-md border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200"
                   rows={3}
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notes: e.target.value })
+                  }
                   placeholder="Any special instructions..."
                 ></textarea>
               </div>
@@ -167,7 +244,9 @@ const BuyFormPage: React.FC = () => {
                 <div className="flex items-start">
                   <FileText className="h-5 w-5 text-blue-500 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="text-sm font-medium text-blue-800">Purchase Information</h4>
+                    <h4 className="text-sm font-medium text-blue-800">
+                      Purchase Information
+                    </h4>
                     <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
                       <li>Payment will be collected at the time of delivery</li>
                       <li>You can inspect the item before payment</li>
@@ -179,7 +258,8 @@ const BuyFormPage: React.FC = () => {
 
               <div className="flex space-x-4">
                 <Button
-                  type="submit"
+                  onClick={handleSubmit}
+                  type="button"
                   variant="primary"
                   icon={<CreditCard className="h-5 w-5" />}
                   fullWidth
@@ -189,7 +269,7 @@ const BuyFormPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/waste')}
+                  onClick={() => navigate("/waste")}
                   fullWidth
                 >
                   Cancel

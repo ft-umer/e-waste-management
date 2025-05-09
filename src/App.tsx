@@ -12,7 +12,7 @@ import PickupRequestPage from "./pages/PickupRequestPage";
 import SignInPage from "./pages/SignInPage";
 import ListWastePage from "./pages/waste/ListWastePage";
 
-import RiderDashboardPage from './pages/rider/RiderDashboardPage';
+import RiderDashboardPage from "./pages/rider/RiderDashboardPage";
 import AddWasteItemPage from "./pages/waste/addWasteItemPage";
 import RecycleFormPage from "./pages/waste/RecycleFromPage";
 import BuyFormPage from "./pages/waste/BuyFormPage";
@@ -25,6 +25,7 @@ import DashboardPage from "./pages/DashBoardPage";
 import "./index.css";
 import PrivateRoute from "./components/PrivateRoute";
 import RiderSignupPage from "./pages/rider/RiderSignUpPage";
+import RiderLoginPage from "./pages/rider/riderLoginPage";
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
             <Route
               path="/services/pickup"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <PickupRequestPage />
                 </PrivateRoute>
               }
@@ -48,7 +49,7 @@ function App() {
             <Route
               path="/waste"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <ListWastePage />
                 </PrivateRoute>
               }
@@ -56,7 +57,7 @@ function App() {
             <Route
               path="/seminars"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <SeminarsPage />
                 </PrivateRoute>
               }
@@ -65,7 +66,7 @@ function App() {
             <Route
               path="/waste/recycle/:id"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <RecycleFormPage />
                 </PrivateRoute>
               }
@@ -73,7 +74,7 @@ function App() {
             <Route
               path="/waste/buy/:id"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <BuyFormPage />
                 </PrivateRoute>
               }
@@ -81,7 +82,7 @@ function App() {
             <Route
               path="/seminars/new"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <CreateSeminarPage />
                 </PrivateRoute>
               }
@@ -91,7 +92,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={["admin", "user"]}>
                   <DashboardPage />
                 </PrivateRoute>
               }
@@ -99,15 +100,23 @@ function App() {
             <Route
               path="/waste/new"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['admin','user']}>
                   <AddWasteItemPage />
                 </PrivateRoute>
               }
             />
-            
-           
+
             <Route path="/rider/signup" element={<RiderSignupPage />} />
-            <Route path="/rider/dashboard" element={<RiderDashboardPage />} />
+            <Route path="/rider/login" element={<RiderLoginPage />} />
+            <Route
+              path="/rider/dashboard"
+              element={
+                <PrivateRoute allowedRoles={["rider"]}>
+                  <RiderDashboardPage />
+                </PrivateRoute>
+              }
+            />
+
             {/* Add more routes as needed */}
           </Routes>
         </main>

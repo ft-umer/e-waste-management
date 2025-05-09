@@ -33,7 +33,6 @@ const AddWasteItemPage: React.FC = () => {
   });
 
   const [loadingImage, setLoadingImage] = useState(false);
-
   const handleImageAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -46,7 +45,7 @@ const AddWasteItemPage: React.FC = () => {
       setLoadingImage(true);
       const res = await axios.post('https://api.cloudinary.com/v1_1/dtipim18j/image/upload', formDataImage);
       const imageUrl = res.data.secure_url;
-  
+      
       const token = localStorage.getItem('token');
       if (!token) {
         alert('You must be logged in to submit a listing.');
@@ -55,28 +54,27 @@ const AddWasteItemPage: React.FC = () => {
   
       const decoded = jwtDecode<DecodedToken>(token);
       const userId = decoded.id; // Adjust to match your token structure (_id, userId, etc.)
-      // 🔍 Call Gemini to classify
+      // Log the image URL to verify it's correct
+      console.log("Cloudinary Image URL:", imageUrl);
+  
+      // Proceed with classification
       const classification = await classifyImage(imageUrl);
       toast.success(`Image classified as: ${classification}`);
-    //   alert(`Image classified as: ${classification}`);
   
- 
       setFormData(prev => ({
-        user: userId, // ✅ Add user manually for dev/testing
+        user: userId,
         ...prev,
         images: [...prev.images, imageUrl],
-        condition: classification === 'repairable'
-          ? classification
-          : prev.condition 
-          
+        condition: classification === 'repairable' ? classification : prev.condition
       }));
     } catch (error) {
-      console.error('Image upload or classification failed:', error);
-        toast.error('Image upload/classification failed. Try again.');
+      console.error('Image upload failed:', error);
+      toast.error('Image upload failed. Try again.');
     } finally {
       setLoadingImage(false);
     }
   };
+  
 
   const handleImageRemove = (index: number) => {
     setFormData(prev => ({

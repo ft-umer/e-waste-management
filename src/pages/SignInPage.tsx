@@ -1,40 +1,40 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Mail, Lock } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 // ...other imports
-import { signIn } from '../services/auth';
-import { toast } from 'react-toastify';
+import { signIn } from "../services/auth";
+import { toast } from "react-toastify";
 
 const SignInPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
       // Attempt sign-in
       await signIn(email, password);
 
       // ✅ Dispatch the custom auth change event
-      window.dispatchEvent(new Event('authChange'));
+      window.dispatchEvent(new Event("authChange"));
 
       // Redirect to home page
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error("Sign in error:", error);
       toast.error(
-        error.response?.data?.message || 'Login failed. Please try again.'
+        error.response?.data?.message || "Login failed. Please try again."
       );
-      setErrorMessage(error.response?.data?.message || 'Login failed');
+      setErrorMessage(error.response?.data?.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -112,10 +112,23 @@ const SignInPage: React.FC = () => {
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-green-600 hover:text-green-500 font-medium">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-green-600 hover:text-green-500 font-medium"
+            >
               Sign up
             </Link>
+            <p className="mt-6 text-center text-sm text-gray-600">
+              {" "}
+              Rider?{" "}
+              <Link
+                to="/rider/login"
+                className="text-green-600 hover:text-green-500 font-medium"
+              >
+                Riders Login
+              </Link>
+            </p>
           </p>
         </motion.div>
       </div>
