@@ -58,7 +58,7 @@ const WasteItemCard: React.FC<WasteItemCardProps> = ({ item }) => {
           <div className="flex items-center text-gray-600">
             <MapPin className="h-4 w-4 mr-2" />
             <span className="text-sm">
-              {item.location?.address || "Address not available"}
+              {item.address || "Address not available"}
             </span>
           </div>
 
